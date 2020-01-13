@@ -5,7 +5,6 @@
 # model.py: A general model for parsing (class Model).
 # Also a general model for bracketing parsing (class BracketingModel).
 
-import itertools
 
 import bracketing
 import sentence
@@ -143,37 +142,24 @@ class BracketingModel(Model):
             # print "  Precision: %2.1f" % (100*Prec)
             # print "  Recall: %2.1f" % (100*Rec)
             # print "  Media harmonica F1: %2.1f" % (100*F1)
-            print
-            "Sentences:", int(m)
-            print
-            "Micro-averaged measures:"
-            print
-            "  Precision: %2.1f" % (100 * Prec2)
-            print
-            "  Recall: %2.1f" % (100 * Rec2)
-            print
-            "  Harmonic mean F1: %2.1f" % (100 * F12)
+            print("Sentences:", int(m))
+            print("Micro-averaged measures:")
+            print(f"  Precision: {100 * Prec2:2.1f}")
+            print(f"  Recall: {100 * Rec2:2.1f}")
+            print(f"  Harmonic mean F1: {100 * F12:2.1f}")
             if long:
-                print
-                "Brackets parse:", brackets_parse
-                print
-                "Brackets gold:", brackets_gold
-                print
-                "Brackets ok:", brackets_ok
+                print("Brackets parse:", brackets_parse)
+                print("Brackets gold:", brackets_gold)
+                print("Brackets ok:", brackets_ok)
                 Prec = Prec / m
                 Rec = Rec / m
                 F1 = 2 * (Prec * Rec) / (Prec + Rec)
-                print
-                "Macro-averaged measures:"
-                print
-                "  Precision: %2.1f" % (100 * Prec)
-                print
-                "  Recall: %2.1f" % (100 * Rec)
-                print
-                "  Harmonic mean F1: %2.1f" % (100 * F1)
+                print("Macro-averaged measures:")
+                print(f"  Precision: {100 * Prec:2.1f}")
+                print(f"  Recall: {100 * Rec:2.1f}")
+                print(f"  Harmonic mean F1: {100 * F1:2.1f}")
         elif output and short:
-            print
-            "F1 =", F12
+            print("F1 =", F12)
 
         return self.evaluation
 
@@ -221,9 +207,9 @@ class BracketingModel(Model):
             p = self.Parse[i].brackets
             n = float(bracketing.coincidences(self.Gold[i], self.Parse[i]))
         if self.count_fullspan_bracket:
-            return (n + 1, len(p) + 1, len(g) + 1)
+            return n + 1, len(p) + 1, len(g) + 1
         else:
-            return (n, len(p), len(g))
+            return n, len(p), len(g)
 
     # FIXME: pegado asi nomas: adaptar esto para usar measures.
     def eval_by_length(self):
@@ -241,7 +227,7 @@ class BracketingModel(Model):
             brackets_parse[i] = 0
             brackets_gold[i] = 0
 
-        for gb, pb in itertools.izip(Gold, Parse):
+        for gb, pb in zip(Gold, Parse):
             gb.set_start_index(0)
             pb.set_start_index(0)
             l = gb.length

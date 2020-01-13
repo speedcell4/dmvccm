@@ -54,7 +54,7 @@ class Tree(tree.Tree):
                 if f(st):
                     st = recursion(st, f)
                     subtrees += [st]
-            if subtrees == []:
+            if not subtrees:
                 return t.label()
             else:
                 return tree.Tree(t.label(), subtrees)
@@ -145,7 +145,7 @@ class Tree(tree.Tree):
     def dfs(self):
         queue = self.treepositions()
         stack = [queue.pop(0)]
-        while stack != []:
+        while stack:
             p = stack[-1]
             if queue == [] or queue[0][:-1] != p:
                 stack.pop()
@@ -160,7 +160,7 @@ class Tree(tree.Tree):
         stack = [(queue.pop(0), 0)]
         j = 0
         result = []
-        while stack != []:
+        while stack:
             (p, i) = stack[-1]
             if queue == [] or queue[0][:-1] != p:
                 # ya puedo devolver spanning de p:
@@ -189,7 +189,7 @@ class Tree(tree.Tree):
         stack = [(queue.pop(0), 0)]
         j = 0
         result = set()
-        while stack != []:
+        while stack:
             (p, i) = stack[-1]
             if queue == [] or queue[0][:-1] != p:
                 # ya puedo devolver spanning de p:
@@ -286,12 +286,13 @@ def labelled_measures(gold, parse):
         if n == len(gold_spans):
             cb += 1
 
-    return {'labelled_precision': float(l_hits) / float(len(parse_spans)),
-            'labelled_recall': float(l_hits) / float(len(gold_spans)),
-            # 'bad_bracketed_precision': float(hits) / float(len(parse_spans)),
-            # 'bad_bracketed_recall': float(hits) / float(len(gold_spans)),
-            # 'bad_consistent_brackets_recall': float(cb) / float(len(gold_spans))
-            }
+    return {
+        'labelled_precision': float(l_hits) / float(len(parse_spans)),
+        'labelled_recall': float(l_hits) / float(len(gold_spans)),
+        # 'bad_bracketed_precision': float(hits) / float(len(parse_spans)),
+        # 'bad_bracketed_recall': float(hits) / float(len(gold_spans)),
+        # 'bad_consistent_brackets_recall': float(cb) / float(len(gold_spans))
+    }
 
 
 def bracketed_measures(gold, parse):
@@ -329,21 +330,24 @@ def bracketed_measures(gold, parse):
         if n == len(gold_spans):
             cb += 1
 
-    return {'bracketed_precision': float(hits) / float(len(parse_spans)),
-            'bracketed_recall': float(hits) / float(len(gold_spans)),
-            'consistent_brackets_recall': float(cb) / float(len(gold_spans))}
+    return {
+        'bracketed_precision': float(hits) / float(len(parse_spans)),
+        'bracketed_recall': float(hits) / float(len(gold_spans)),
+        'consistent_brackets_recall': float(cb) / float(len(gold_spans)),
+    }
 
 
 def empty_measures():
-    return {'labelled_precision': 0.0,
-            'bracketed_precision': 0.0,
-            'labelled_recall': 0.0,
-            'bracketed_recall': 0.0,
-            'consistent_brackets_recall': 0.0,
-            # 'bad_bracketed_precision': 0.0,
-            # 'bad_bracketed_recall': 0.0,
-            # 'bad_consistent_brackets_recall': 0.0
-            }
+    return {
+        'labelled_precision': 0.0,
+        'bracketed_precision': 0.0,
+        'labelled_recall': 0.0,
+        'bracketed_recall': 0.0,
+        'consistent_brackets_recall': 0.0,
+        # 'bad_bracketed_precision': 0.0,
+        # 'bad_bracketed_recall': 0.0,
+        # 'bad_consistent_brackets_recall': 0.0
+    }
 
 
 """def labelled_precision(gold, parse):
@@ -427,7 +431,7 @@ class Treebank(SyntaxCorpusReader):
             f.close()
         avg_height = avg_height / len(trees)
         avg_length = float(words) / len(trees)
-        return (len(trees), avg_height, avg_length)
+        return len(trees), avg_height, avg_length
 
     def print_stats(self, filename=None):
         (size, height, length) = self.stats(filename)
@@ -524,7 +528,7 @@ class SavedTreebank(Treebank):
         self.basedir = basedir
 
     def get_trees(self):
-        if self.trees == []:
+        if not self.trees:
             # attempt to load cache
             trees = util.load_obj(self.filename)
             if trees is None or trees == []:  # not cached yet
@@ -568,7 +572,7 @@ class SavedTreebank(Treebank):
             path = os.path.join(self.basedir, file)
             s = open(path).read()
             # i = 0
-            for i, t in itertools.izip(itertools.count(), tokenize_paren(s)):
+            for i, t in zip(itertools.count(), tokenize_paren(s)):
                 yield Tree(tree.bracket_parse(t), [file, i])
                 # i += 1
 

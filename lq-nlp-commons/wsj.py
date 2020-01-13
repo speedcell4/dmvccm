@@ -18,7 +18,7 @@ word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD',
              'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ',
              'WDT', 'WP', 'WP$', 'WRB']
 currency_tags_words = ['#', '$', 'C$', 'A$']
-ellipsis = ['*', '*?*', '0', '*T*', '*ICH*', '*U*', '*RNR*', '*EXP*', '*PPA*', '*NOT*']
+ellipsis_ = ['*', '*?*', '0', '*T*', '*ICH*', '*U*', '*RNR*', '*EXP*', '*PPA*', '*NOT*']
 punctuation_tags = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``']
 punctuation_words = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``', '--', ';', '-', '?', '!', '...', '-LCB-', '-RCB-']
 
@@ -33,7 +33,7 @@ punctuation_words = ['.', ',', ':', '-LRB-', '-RRB-', '\'\'', '``', '--', ';', '
 
 # funciona tanto si las hojas son lexico como POS tags.
 def is_ellipsis(s):
-    return s == '-NONE-' or s.partition('-')[0] in ellipsis
+    return s == '-NONE-' or s.partition('-')[0] in ellipsis_
 
 
 # funciona tanto si las hojas son lexico como POS tags.
@@ -109,13 +109,13 @@ class WSJ(treebank.SavedTreebank):
             t = read_parsed_tb_block(f)
             # print "Parsing", len(t), "trees from file", file
             print("Parsing file", file)
-            while t != []:
+            while t:
                 size += 1
                 # yield treebank.Tree(t[0], [file, i])
                 yield WSJTree(t[0], [file, i])
                 i = i + 1
                 t = t[1:]
-                if t == []:
+                if not t:
                     t = read_parsed_tb_block(f)
         print("Finished processing", size, "trees")
 

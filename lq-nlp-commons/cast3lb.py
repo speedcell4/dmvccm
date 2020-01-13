@@ -54,7 +54,7 @@ class Cast3LB(treebank.SavedTreebank):
     filename = 'cast3lb.treebank'
 
     def __init__(self, basedir=None, load=False):
-        if basedir == None:
+        if basedir is None:
             self.basedir = self.default_basedir
         else:
             self.basedir = basedir
