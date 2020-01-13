@@ -10,7 +10,6 @@ import sys
 
 import nltk
 
-
 obj_basedir = 'lq-nlp-commons'
 
 
@@ -34,18 +33,19 @@ def powerset(s):
     else:
         e = s[0]
         p = powerset(s[1:])
-        return p + map(lambda x: x+[e], p)
+        return p + map(lambda x: x + [e], p)
 
 
 # me fijo si un bracketing no tiene cosas que se cruzan
 def tree_consistent(b):
     """FIXME: move this to the bracketing package.
     """
-    def crosses((a,b),(c,d)):
-        return (a < c and c < b and b < d) or (c < a and a < d and d < b)
+
+    def crosses((a, b), (c, d)):
+        return (a < c < b < d) or (c < a < d < b)
 
     for i in range(len(b)):
-        for j in range(i+1,len(b)):
+        for j in range(i + 1, len(b)):
             if crosses(b[i], b[j]):
                 return False
     return True
@@ -88,7 +88,7 @@ def load_objs(filename):
         try:
             while True:
                 objects += [pickle.load(f)]
-        except EOFError: # It will always be thrown
+        except EOFError:  # It will always be thrown
             f.close()
     except IOError:
         objects = None
@@ -105,12 +105,12 @@ class ObjectSaver:
         try:
             while True:
                 self.orig_objs += [pickle.load(self.f)]
-        except EOFError: # It will always be thrown
+        except EOFError:  # It will always be thrown
             pass
-    
+
     def save_obj(self, object):
         pickle.dump(object, self.f, pickle.HIGHEST_PROTOCOL)
-        
+
     def flush(self):
         self.f.flush()
 
@@ -130,18 +130,18 @@ class Progress:
     >>> p.next()
       2 of 200
     """
-    
+
     def __init__(self, prefix, n_init, n_max):
         m = len(str(n_max))
-        o = "%"+str(m)+"d of "+str(n_max)
+        o = "%" + str(m) + "d of " + str(n_max)
         self.i = 0
-        print prefix, o % self.i,
+        print(prefix, o % self.i, end=' ')
         sys.stdout.flush()
-        self.o = ("\b"*(2*m+5)) + o
+        self.o = ("\b" * (2 * m + 5)) + o
 
     def next(self):
         self.i += 1
-        print self.o % self.i,
+        print(self.o % self.i, end=' ')
         sys.stdout.flush()
 
 
@@ -151,22 +151,25 @@ class Progress:
 
 import compiler
 
+
 class Unsafe_Source_Error(Exception):
-    def __init__(self,error,descr = None,node = None):
+    def __init__(self, error, descr=None, node=None):
         self.error = error
         self.descr = descr
         self.node = node
-        self.lineno = getattr(node,"lineno",None)
+        self.lineno = getattr(node, "lineno", None)
 
     def __repr__(self):
         return "Line %d.  %s: %s" % (self.lineno, self.error, self.descr)
+
     __str__ = __repr__
+
 
 class SafeEval(object):
 
-    def visit(self, node,**kw):
+    def visit(self, node, **kw):
         cls = node.__class__
-        meth = getattr(self,'visit'+cls.__name__,self.default)
+        meth = getattr(self, 'visit' + cls.__name__, self.default)
         return meth(node, **kw)
 
     def default(self, node, **kw):
@@ -178,13 +181,13 @@ class SafeEval(object):
     def visitConst(self, node, **kw):
         return node.value
 
-    def visitDict(self,node,**kw):
-        return dict([(self.visit(k),self.visit(v)) for k,v in node.items])
+    def visitDict(self, node, **kw):
+        return dict([(self.visit(k), self.visit(v)) for k, v in node.items])
 
-    def visitTuple(self,node, **kw):
+    def visitTuple(self, node, **kw):
         return tuple(self.visit(i) for i in node.nodes)
 
-    def visitList(self,node, **kw):
+    def visitList(self, node, **kw):
         return [self.visit(i) for i in node.nodes]
 
     def visitUnarySub(self, node, **kw):
@@ -195,22 +198,22 @@ class SafeEvalWithErrors(SafeEval):
 
     def default(self, node, **kw):
         raise Unsafe_Source_Error("Unsupported source construct",
-                                node.__class__,node)
+                                  node.__class__, node)
 
-    def visitName(self,node, **kw):
+    def visitName(self, node, **kw):
         raise Unsafe_Source_Error("Strings must be quoted",
-                                 node.name, node)
+                                  node.name, node)
 
     # Add more specific errors if desired
 
 
-def safe_eval(source, fail_on_error = True):
+def safe_eval(source, fail_on_error=True):
     walker = fail_on_error and SafeEvalWithErrors() or SafeEval()
     try:
-        ast = compiler.parse(source,"eval")
-    except SyntaxError, err:
+        ast = compiler.parse(source, "eval")
+    except SyntaxError as err:
         raise
     try:
         return walker.visit(ast)
-    except Unsafe_Source_Error, err:
+    except Unsafe_Source_Error as err:
         raise

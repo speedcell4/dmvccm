@@ -2,7 +2,6 @@
 # URL: <http://www.cs.famaf.unc.edu.ar/~francolq/>
 # For license information, see LICENSE.txt
 
-import itertools
 
 from nltk.util import LazyMap
 
@@ -14,15 +13,15 @@ class WSJn(wsj.WSJ):
     def __init__(self, n, basedir=None, load=True):
         wsj.WSJ.__init__(self, basedir)
         self.n = n
-        self.filename = 'wsj%02i.treebank' % n
+        self.filename = f'wsj{n:02d}.treebank'
         if load:
             self.get_trees()
-    
+
     def _generate_trees(self):
-        print "Parsing treebank..."
+        print("Parsing treebank...")
         f = lambda t: len(t.leaves()) <= self.n
         m = lambda t: self._prepare(t)
-        trees = [t for t in itertools.ifilter(f, itertools.imap(m, self.parsed()))]
+        trees = [t for t in filter(f, map(m, self.parsed()))]
         return trees
 
     def _prepare(self, t):
@@ -30,21 +29,21 @@ class WSJn(wsj.WSJ):
         # Remove punctuation, ellipsis and currency ($, #) at the same time:
         t.filter_tags(lambda x: x in wsj.word_tags)
         return t
-    
+
     def tagged_sents(self):
         # LazyMap from nltk.util:
-        f = lambda t: [(x,x) for x in t.leaves()]
-        return LazyMap(f,  self.get_trees())
+        f = lambda t: [(x, x) for x in t.leaves()]
+        return LazyMap(f, self.get_trees())
 
 
 class WSJ10(WSJn):
-   
+
     def __init__(self, basedir=None, load=True):
         WSJn.__init__(self, 10, basedir, load)
 
 
 class WSJ40(WSJn):
-   
+
     def __init__(self, basedir=None, load=True):
         WSJn.__init__(self, 40, basedir, load)
 
@@ -53,14 +52,14 @@ class WSJ10P(wsj.WSJ):
     """The 7422 sentences of the WSJ10 treebank but including punctuation.
     """
     # antes era puntuacion pero sin el punto final
-    #valid_tags = wsj.word_tags + wsj.punctuation_tags[1:]
-    #punctuation_tags = wsj.punctuation_tags[1:]
+    # valid_tags = wsj.word_tags + wsj.punctuation_tags[1:]
+    # punctuation_tags = wsj.punctuation_tags[1:]
     # pero no da para dejar afuera el punto porque no solo aparece al final (y es tag de ? y !):
     valid_tags = wsj.word_tags + wsj.punctuation_tags
     punctuation_tags = wsj.punctuation_tags
     stop_punctuation_tags = [',', '.', ':']
     bracket_punctuation_tag_pairs = [('-LRB-', '-RRB-'), ('``', '\'\'')]
-    
+
     def __init__(self, basedir=None, load=True):
         n = 10
         wsj.WSJ.__init__(self, basedir)
@@ -68,19 +67,20 @@ class WSJ10P(wsj.WSJ):
         self.filename = 'wsj%02ip.treebank' % n
         if load:
             self.get_trees()
-   
+
     def _generate_trees(self):
-        print "Parsing treebank..."
+        print("Parsing treebank...")
         f = lambda t: len(filter(lambda x: x not in self.punctuation_tags, t.leaves())) <= self.n
         m = lambda t: self._prepare(t)
-        trees = [t for t in itertools.ifilter(f, itertools.imap(m, self.parsed()))]
+        trees = [t for t in filter(f, map(m, self.parsed()))]
         return trees
-   
+
     def _prepare(self, t):
         t.remove_leaves()
         # Con esto elimino ellipsis y $ y # (currency) al mismo tiempo:
         t.filter_tags(lambda x: x in self.valid_tags)
         return t
+
 
 """
 Comparo la version vieja con la nueva:
@@ -108,7 +108,7 @@ Comparo la version vieja con la nueva:
 
 
 class WSJnTagged(WSJn):
-    
+
     def __init__(self, n, basedir=None, load=True):
         wsj.WSJ.__init__(self, basedir)
         self.n = n
@@ -116,34 +116,33 @@ class WSJnTagged(WSJn):
         self.tagger = WSJTagger()
         if load:
             self.get_trees()
-   
+
     def _prepare(self, t):
         # quito puntuacion, ellipsis y monedas, sin quitar las hojas:
-        #t.remove_punctuation()
-        #t.remove_ellipsis()
-        #t.filter_tags(lambda x: x not in wsj.currency_tags_words)
+        # t.remove_punctuation()
+        # t.remove_ellipsis()
+        # t.filter_tags(lambda x: x not in wsj.currency_tags_words)
         t.filter_subtrees(lambda t: type(t) == str or len([x for x in t.pos() if x[1] in wsj.word_tags]) > 0)
         t.map_leaves(self.tagger.tag)
         return t
 
 
 class WSJ10Tagged(WSJnTagged):
-   
+
     def __init__(self, basedir=None, load=True):
         WSJnTagged.__init__(self, 10, basedir, load)
 
 
 class WSJTagger:
-   
     filename = '../obj/clusters.nem.32'
-    
+
     def __init__(self):
         f = open(self.filename)
         self.tag_dict = {}
         for l in f:
             l2 = l.split()
-            self.tag_dict[l2[0]] = l2[1]+'C'
-   
+            self.tag_dict[l2[0]] = l2[1] + 'C'
+
     def tag(self, word):
         return self.tag_dict[word.upper()]
 
@@ -182,7 +181,7 @@ QUE BOSTA, SE USAN COMILLAS SIMPLES CUANDO DEBERIAN SER DOBLES:
 
 
 class WSJnLex(WSJn):
-    
+
     def __init__(self, n, load=True):
         wsj.WSJ.__init__(self)
         self.n = n
@@ -190,12 +189,12 @@ class WSJnLex(WSJn):
         self.tagger = WSJTagger()
         if load:
             self.get_trees()
-    
+
     def _prepare(self, t):
         # quito puntuacion, ellipsis y monedas, sin quitar las hojas:
-        #t.remove_punctuation()
-        #t.remove_ellipsis()
-        #t.filter_tags(lambda x: x not in wsj.currency_tags_words)
+        # t.remove_punctuation()
+        # t.remove_ellipsis()
+        # t.filter_tags(lambda x: x not in wsj.currency_tags_words)
         t.filter_subtrees(lambda t: type(t) == str or len([x for x in t.pos() if x[1] in wsj.word_tags]) > 0)
         return t
 
@@ -203,6 +202,7 @@ class WSJnLex(WSJn):
 class WSJ10Lex(WSJnLex):
     def __init__(self, load=True):
         WSJnLex.__init__(self, 10, load)
+
 
 """
 CREO UN ARCHIVO DE TEXTO CON LAS FRASES DEL WSJ10:
@@ -217,6 +217,7 @@ CREO UN ARCHIVO DE TEXTO CON LAS FRASES DEL WSJ10:
 >>>
 
 """
+
 
 def test():
     tb = WSJ10()

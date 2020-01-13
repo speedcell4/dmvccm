@@ -6,7 +6,7 @@
 # functions.
 
 class ParamDict:
-    
+
     def __init__(self, d=None, default_val=0.0, count_evidence=False):
         if d is None:
             self.d = {}
@@ -19,21 +19,21 @@ class ParamDict:
 
     def set_default_val(self, val):
         self.default_val = val
-    
+
     def val(self, x):
         return self.d.get(x, self.default_val)
-    
+
     def setVal(self, x, val):
         self.d[x] = val
-    
+
     def add1(self, x):
         self.add(x, 1.0)
-    
+
     def add(self, x, y):
         add(self.d, x, y)
         if self.count_evidence and y > 0.0:
             add(self.evidence, x, 1.0)
-    
+
     def iteritems(self):
         return self.d.iteritems()
 

@@ -4,30 +4,34 @@
 
 # rbranch.py: RBRANCH baseline for unsupervised parsing.
 
-import bracketing, model
+import bracketing
+import model
+
 
 class RBranch(model.BracketingModel):
     trained = True
     tested = True
-    
+
     def __init__(self, treebank=None):
         model.BracketingModel.__init__(self, treebank)
         self.Parse = [bracketing.rbranch_bracketing(b.length) for b in self.Gold]
 
 
 def main():
-    print 'WSJ10'
+    print('WSJ10')
     main1()
-    print 'NEGRA10'
+    print('NEGRA10')
     main2()
-    print 'CAST3LB10'
+    print('CAST3LB10')
     main3()
+
 
 def main1():
     import wsj10
     tb = wsj10.WSJ10()
     m = RBranch(tb)
     m.eval()
+
 
 def main2():
     import negra10
@@ -36,12 +40,14 @@ def main2():
     m = RBranch(tb)
     m.eval()
 
+
 def main3():
     import cast3lb10
     tb = cast3lb10.Cast3LB10()
     tb.simplify_tags()
     m = RBranch(tb)
     m.eval()
+
 
 """
 from rbranch import *

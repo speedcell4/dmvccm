@@ -2,7 +2,7 @@
 # URL: <http://www.cs.famaf.unc.edu.ar/~francolq/>
 # For license information, see LICENSE.txt
 
-#!/usr/bin/python
+# !/usr/bin/python
 
 # Calculo de precision y recall para el topline UBOUND
 
@@ -28,15 +28,17 @@ Medidas sumando todos los brackets:
   Media harmonica F1: 82.4
 """
 
-import model, bracketing
+import bracketing
+import model
+
 
 class UBound(model.BracketingModel):
     trained = True
     tested = True
-    
+
     def __init__(self, treebank):
         self.Gold = [bracketing.tree_to_bracketing(t) for t in treebank.trees]
-    
+
     # FIXME: no esta bien adaptado para usar count_fullspan_bracket
     def measures(self, i):
         g = self.Gold[i]
@@ -45,30 +47,32 @@ class UBound(model.BracketingModel):
         m = g.length - 2
         if m > 0:
             if self.count_fullspan_bracket:
-                prec = float(n+1) / float(m+1)
+                prec = float(n + 1) / float(m + 1)
             else:
                 prec = float(n) / float(m)
         else:
             prec = 1.0
         rec = 1.0
-        return (prec, rec)
-    
+        return prec, rec
+
     def measures2(self, i):
         g = self.Gold[i]
         n = len(g.brackets)
         m = g.length - 2
         if self.count_fullspan_bracket:
-            return (n+1, m+1, n+1)
+            return n + 1, m + 1, n + 1
         else:
-            return (n, m, n)
+            return n, m, n
+
 
 def main():
-    print 'WSJ10'
+    print('WSJ10')
     main1()
-    print 'NEGRA10'
+    print('NEGRA10')
     main2()
-    print 'CAST3LB10'
+    print('CAST3LB10')
     main3()
+
 
 def main1():
     import wsj10
@@ -76,6 +80,7 @@ def main1():
     m = UBound(tb)
     m.eval()
     return m
+
 
 def main2():
     import negra10
@@ -85,6 +90,7 @@ def main2():
     m.eval()
     return m
 
+
 def main3():
     import cast3lb10
     tb = cast3lb10.Cast3LB10()
@@ -92,6 +98,7 @@ def main3():
     m = UBound(tb)
     m.eval()
     return m
+
 
 # VIEJO:
 

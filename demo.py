@@ -18,14 +18,12 @@ import nltk.corpus
 
 from nltk.corpus import ptb
 
-
 from nltk.corpus.util import LazyCorpusLoader
 from nltk.corpus.reader import *
 
-
 dependency_treebank = LazyCorpusLoader(
-     'dependency_treebank', DependencyCorpusReader, '.*\.dp',
-     encoding='ascii')
+    'dependency_treebank', DependencyCorpusReader, '.*\.dp',
+    encoding='ascii')
 
 # from dmvccm import dmv
 # m = dmv.DMV()
@@ -33,12 +31,13 @@ dependency_treebank = LazyCorpusLoader(
 # s = 'DT NNP NN VBD DT VBZ DT JJ NN'.split()
 # (t, p) = m.dep_parse(s)
 # t.draw()
-  
+
 
 from dmvccm import ccm
 from dmvccm.dmvccm import *
 
 import wsj10
+
 # tb = wsj10.WSJ10(basedir='wsj_comb/parsed/mrg')
 # m = ccm.CCM(tb)
 # print m
@@ -50,19 +49,19 @@ import wsj10
 
 
 # can't do - presumably not tagged
-#m = ccm.CCM(dependency_treebank)
+# m = ccm.CCM(dependency_treebank)
 
-#from nltk.corpus import treebank
-#t = treebank.parsed_sents('wsj_0001.mrg')[0]
+# from nltk.corpus import treebank
+# t = treebank.parsed_sents('wsj_0001.mrg')[0]
 
 
 tb = wsj10.WSJ10(basedir=CORPUS_DIR)
-#print tb.get_trees()
-#print tb.raw()
+# print tb.get_trees()
+# print tb.raw()
 tb.print_stats()
 
 m = ccm.CCM(tb)
-print m
+print(m)
 m.train(40)
 m.test()
 
