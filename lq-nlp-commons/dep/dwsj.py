@@ -22,10 +22,10 @@ from dep import depset
 
 
 class DepWSJ(wsj10.WSJn):
-    
+
     def __init__(self, max_length, basedir=None, load=True):
         wsj10.WSJn.__init__(self, max_length, basedir, load=False)
-        self.filename = 'dwsj%02i.treebank' % max_length
+        self.filename = f'dwsj{max_length:02d}.treebank'
         if load:
             self.get_trees()
 
@@ -39,7 +39,7 @@ class DepWSJ(wsj10.WSJn):
 
 
 class DepWSJ10(DepWSJ):
-    
+
     def __init__(self, basedir=None, load=True):
         DepWSJ.__init__(self, 10, basedir, load)
 
@@ -52,10 +52,10 @@ def find_heads(t):
     for st in t.subtrees():
         label = st.label().split('-')[0].split('=')[0]
         # the children may be a tree or a leaf (type string):
-        children = [(type(x) is str and x) or (type(x) is unicode and x) or
+        children = [(type(x) is str and x) or (type(x) is str and x) or
                     x.label().split('-')[0] for x in st]
-        st.head = get_head(label, children)-1
-        st.set_label('['+children[st.head]+']')
+        st.head = get_head(label, children) - 1
+        st.set_label('[' + children[st.head] + ']')
 
 
 def tree_to_depset(t):
@@ -67,7 +67,7 @@ def tree_to_depset(t):
     # Traverse the tree from the leaves upwards (postorder)
     for p in t.treepositions(order='postorder'):
         st = t[p]
-        if isinstance(st, str) or isinstance(st, unicode):
+        if isinstance(st, str) or isinstance(st, str):
             # We are at leave with index leave_index.
             aux[p] = leave_index
             leave_index += 1
@@ -75,18 +75,18 @@ def tree_to_depset(t):
             # We are at a subtree. aux has the index of the
             # head for each subsubtree.
             head = st.head
-            if type(st[head]) is str or type(st[head]) is unicode:
+            if type(st[head]) is str or type(st[head]) is str:
                 # index of the leave at deptree[head]
-                head_index = aux[p+(head,)]
+                head_index = aux[p + (head,)]
             else:
                 head_index = st[head].head_index
             st.head_index = head_index
             for i in range(len(st)):
                 sst = st[i]
                 if i == head:
-                    pass # skip self dependency
-                elif type(sst) is str or type(sst) is unicode:
-                    res.add((aux[p+(i,)], head_index))
+                    pass  # skip self dependency
+                elif type(sst) is str or type(sst) is str:
+                    res.add((aux[p + (i,)], head_index))
                 else:
                     res.add((sst.head_index, head_index))
     res.add((t.head_index, -1))
@@ -112,19 +112,19 @@ def get_head(label, children):
         # search* returns indexes starting from 1
         # (to avoid confusion between 0 and False):
         res = (children[-1] in wsj.word_tags and len(children)) or \
-                searchr(children, set('NN NNP NNS NNPS NNS NX POS JJR'.split())) or \
-                searchl(children, 'NP') or \
-                searchr(children, set('$ ADJP PRN'.split())) or \
-                searchr(children, 'CD') or \
-                searchr(children, set('JJ JJS RB QP'.split())) or \
-                len(children)
+              searchr(children, set('NN NNP NNS NNPS NNS NX POS JJR'.split())) or \
+              searchl(children, 'NP') or \
+              searchr(children, set('$ ADJP PRN'.split())) or \
+              searchr(children, 'CD') or \
+              searchr(children, set('JJ JJS RB QP'.split())) or \
+              len(children)
     else:
         rule = head_rules[label]
         plist = rule[1]
         if plist == [] and rule[0] == 'r':
             res = len(children)
         # Redundant:
-        #elif plist == [] and rule[0] == 'l':
+        # elif plist == [] and rule[0] == 'l':
         #    res = 1
         else:
             res = None
@@ -135,7 +135,7 @@ def get_head(label, children):
                 res = searchl(children, plist[i])
                 i += 1
         else:
-            #assert rule[0] == 'r'
+            # assert rule[0] == 'r'
             while i < n and res is None:
                 # search* returns indexes starting from 1
                 res = searchr(children, plist[i])
@@ -144,9 +144,9 @@ def get_head(label, children):
             res = 1
 
     # Rules for coordinated phrases
-    #if 'CC' in [res-2 >= 0 and children[res-2], \
+    # if 'CC' in [res-2 >= 0 and children[res-2], \
     #            res < len(children) and children[res]]:
-    if res-2 >= 1 and children[res-2] == 'CC':
+    if res - 2 >= 1 and children[res - 2] == 'CC':
         # On the other case the head doesn't change.
         res -= 2
 
@@ -162,7 +162,7 @@ def searchr(l, e):
     if r is None:
         return None
     else:
-        return len(l)-r+1
+        return len(l) - r + 1
 
 
 def searchl(l, e):
@@ -170,42 +170,43 @@ def searchl(l, e):
     starting from 1 (just for convenience in the usage, see get_head). Returns
     None if there is no occurrence.
     """
-    #print 'searchl('+str(l)+', '+str(e)+')'
+    # print 'searchl('+str(l)+', '+str(e)+')'
     if type(e) is not set:
-        e = set([e])
+        e = {e}
     i, n = 0, len(l)
     while i < n and l[i] not in e:
         i += 1
     if i == n:
         return None
     else:
-        #return l[i]
-        return i+1
+        # return l[i]
+        return i + 1
 
 
-head_rules = {'ADJP': ('l', 'NNS QP NN $ ADVP JJ VBN VBG ADJP JJR NP JJS DT FW RBR RBS SBAR RB'.split()), \
- 'ADVP': ('r', 'RB RBR RBS FW ADVP TO CD JJR JJ IN NP JJS NN'.split()), \
- 'CONJP': ('r', 'CC RB IN'.split()), \
- 'FRAG': ('r', []), \
- 'INTJ': ('l', []), \
- 'LST': ('r', 'LS :'.split()), \
- 'NAC': ('l', 'NN NNS NNP NNPS NP NAC EX $ CD QP PRP VBG JJ JJS JJR ADJP FW'.split()), \
- 'PP': ('r', 'IN TO VBG VBN RP FW'.split()), \
- 'PRN': ('l', []), \
- 'PRT': ('r', 'RP'.split()), \
- 'QP': ('l', '$ IN NNS NN JJ RB DT CD NCD QP JJR JJS'.split()), \
- 'RRC': ('r', 'VP NP ADVP ADJP PP'.split()), \
- 'S': ('l', 'TO IN VP S SBAR ADJP UCP NP'.split()), \
- 'SBAR': ('l', 'WHNP WHPP WHADVP WHADJP IN DT S SQ SINV SBAR FRAG'.split()), \
- 'SBARQ': ('l', 'SQ S SINV SBARQ FRAG'.split()), \
- 'SINV': ('l', 'VBZ VBD VBP VB MD VP S SINV ADJP NP'.split()), \
- 'SQ': ('l', 'VBZ VBD VBP VB MD VP SQ'.split()), \
- 'UCP': ('r', []), \
- 'VP': ('l', 'TO VBD VBN MD VBZ VB VBG VBP VP ADJP NN NNS NP'.split()), \
- 'WHADJP': ('l', 'CC WRB JJ ADJP'.split()), \
- 'WHADVP': ('r', 'CC WRB'.split()), \
- 'WHNP': ('l', 'WDT WP WP$ WHADJP WHPP WHNP'.split()), \
- 'WHPP': ('r', 'IN TO FW'.split()), \
- 'NX': ('r', 'POS NN NNP NNPS NNS NX JJR CD JJ JJS RB QP NP'.split()), \
- 'X': ('r', [])
+head_rules = {
+    'ADJP': ('l', 'NNS QP NN $ ADVP JJ VBN VBG ADJP JJR NP JJS DT FW RBR RBS SBAR RB'.split()),
+    'ADVP': ('r', 'RB RBR RBS FW ADVP TO CD JJR JJ IN NP JJS NN'.split()),
+    'CONJP': ('r', 'CC RB IN'.split()),
+    'FRAG': ('r', []),
+    'INTJ': ('l', []),
+    'LST': ('r', 'LS :'.split()),
+    'NAC': ('l', 'NN NNS NNP NNPS NP NAC EX $ CD QP PRP VBG JJ JJS JJR ADJP FW'.split()),
+    'PP': ('r', 'IN TO VBG VBN RP FW'.split()),
+    'PRN': ('l', []),
+    'PRT': ('r', 'RP'.split()),
+    'QP': ('l', '$ IN NNS NN JJ RB DT CD NCD QP JJR JJS'.split()),
+    'RRC': ('r', 'VP NP ADVP ADJP PP'.split()),
+    'S': ('l', 'TO IN VP S SBAR ADJP UCP NP'.split()),
+    'SBAR': ('l', 'WHNP WHPP WHADVP WHADJP IN DT S SQ SINV SBAR FRAG'.split()),
+    'SBARQ': ('l', 'SQ S SINV SBARQ FRAG'.split()),
+    'SINV': ('l', 'VBZ VBD VBP VB MD VP S SINV ADJP NP'.split()),
+    'SQ': ('l', 'VBZ VBD VBP VB MD VP SQ'.split()),
+    'UCP': ('r', []),
+    'VP': ('l', 'TO VBD VBN MD VBZ VB VBG VBP VP ADJP NN NNS NP'.split()),
+    'WHADJP': ('l', 'CC WRB JJ ADJP'.split()),
+    'WHADVP': ('r', 'CC WRB'.split()),
+    'WHNP': ('l', 'WDT WP WP$ WHADJP WHPP WHNP'.split()),
+    'WHPP': ('r', 'IN TO FW'.split()),
+    'NX': ('r', 'POS NN NNP NNPS NNS NX JJR CD JJ JJS RB QP NP'.split()),
+    'X': ('r', [])
 }
